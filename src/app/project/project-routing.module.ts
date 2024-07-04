@@ -4,10 +4,18 @@ import { IndexComponent } from './index/index.component';
 import { CreateComponent } from './create/create.component';
 import { EditComponent } from './edit/edit.component';
 import { ShowComponent } from './show/show.component';
+import { DashboardComponent } from '../dashboard/dashboard.component';
+import { AboutComponent } from '../about/about.component';
+import { LoginComponent } from '../login/login.component';
+import { RegisterComponent } from '../register/register.component';
  
 const routes: Routes = [
-  { path: '', redirectTo: 'project/index', pathMatch: 'full'},
+  { path: '', redirectTo: 'login', pathMatch: 'full'},
   { path: 'project', redirectTo: 'project/index', pathMatch: 'full'},
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: 'about', component: AboutComponent },
   { path: 'project/index', component: IndexComponent },
   { path: 'project/:id/show', component: ShowComponent },
   { path: 'project/create', component: CreateComponent },

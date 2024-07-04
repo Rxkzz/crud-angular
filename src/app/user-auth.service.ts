@@ -1,25 +1,40 @@
-// src/app/user-auth.service.ts
-
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
+import axios from 'axios';
+ 
 @Injectable({
   providedIn: 'root'
 })
 export class UserAuthService {
-  private baseUrl: string = 'https://api.example.com'; // Ganti dengan base URL dari Swagger API Anda
-
-  constructor(private http: HttpClient) {}
-
-  login(payload: any) {
-    const url = `${this.baseUrl}/auth/login`; // Sesuaikan dengan endpoint login dari Swagger API
-    return this.http.post(url, payload).toPromise();
+ 
+  constructor() { }
+ 
+  login(data:any): Promise<any>{
+    let payload = {
+      email: data.email,
+      password: data.password
+    }
+  
+    return axios.post('/api/login', payload)
   }
-
-  register(payload: any) {
-    const url = `${this.baseUrl}/auth/register`; // Sesuaikan dengan endpoint register dari Swagger API
-    return this.http.post(url, payload).toPromise();
+ 
+  register(data:any): Promise<any>{
+    let payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      password_confirmation: data.confirmPassword
+    }
+     
+    return axios.post('/api/register', payload)
   }
-
-  // Tambahan fungsi lainnya sesuai kebutuhan aplikasi Anda
+ 
+  getUser(): Promise<any>{
+ 
+    return axios.get('/api/user', { headers:{Authorization: 'Bearer ' + localStorage.getItem('token')}})
+  }
+ 
+  logout(): Promise<any>{
+ 
+    return axios.post('/api/logout',{}, { headers:{Authorization: 'Bearer ' + localStorage.getItem('token')}})
+  }
 }
