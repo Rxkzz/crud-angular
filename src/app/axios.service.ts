@@ -76,7 +76,7 @@ export class AxiosService {
   }
 
   updateEquipment(equipment: any): Promise<any> {
-    const url = `${this.baseUrl}Equipment/${equipment.id}`; // Pastikan menggunakan ID yang sesuai
+    const url = `${this.baseUrl}Equipment`;
     return axios.put(url, equipment, { headers: this.getAuthHeaders() })
       .then(response => response.data)
       .catch(error => {

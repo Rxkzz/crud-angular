@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AxiosService } from '../../axios.service';// Sesuaikan path sesuai struktur proyek Anda
+import { AxiosService } from '../../axios.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
-import { Project } from '../project';
+import { Project } from '../project'; // Pastikan Project sesuai dengan struktur data yang diperlukan
 
 @Component({
   selector: 'app-edit',
@@ -19,7 +19,7 @@ export class EditComponent implements OnInit {
     private router: Router
   ) {
     this.project = {
-      id: this.route.snapshot.params['id'],
+      id: this.route.snapshot.params['id'], // Ambil ID dari URL
       modelName: '',
       description: '',
       location: ''
@@ -33,7 +33,7 @@ export class EditComponent implements OnInit {
   loadProject(): void {
     this.axiosService.getEquipmentById(this.project.id)
       .then(response => {
-        this.project = response;
+        this.project = response; // Update project dengan data dari API
       })
       .catch(error => {
         console.error('Error loading project:', error);
