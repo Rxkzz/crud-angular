@@ -1,46 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, RouterModule, Router } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { AxiosService } from '../axios.service';
 import { UserAuthService } from '../user-auth.service';
-import { Router } from '@angular/router';
- 
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit{
-  email:string = ''
-  password:string = ''
-  isSubmitting:boolean = false
-  validationErrors:Array<any> = []
- 
-  constructor(public userAuthService: UserAuthService, private router: Router) {}
- 
-  ngOnInit(): void {
-    if(localStorage.getItem('token') != "" && localStorage.getItem('token') != null){
-      this.router.navigateByUrl('/home')
-    }
-  }
- 
-  loginAction() {
-    this.isSubmitting = true;
-    let payload = {
-      email:this.email,
-      password: this.password,
-  }
-    this.userAuthService.login(payload)
-    .then(({data}) => {
-      localStorage.setItem('token', data.token)
-      this.router.navigateByUrl('/home')
-      return data
+export class LoginComponent {
+  email: string = '';
+  password: string = '';
+  message: string = '';
+
+  constructor(private axiosService: AxiosService, private router: Router) {}
+
+  login() {
+    this.axiosService.login(this.email, this.password).then(response => {
+      console.log('Login berhasil', response);
+      if (response && response.accessToken) {
+        localStorage.setItem('authToken', response.accessToken);
+        localStorage.setItem('userId', response.userId);
+        this.router.navigate(['/home']);
+      } else {
+        this.message = 'Login failed: Access token not found';
+      }
     }).catch(error => {
-      this.isSubmitting = false;
-      if (error.response.data.errors != undefined) {
-        this.validationErrors = error.response.data.message
-      }
-      if (error.response.data.error != undefined) {
-        this.validationErrors = error.response.data.error
-      }
-      return error
-    })
+      console.error('Login gagal', error);
+      this.message = 'Login gagal';
+    });
   }
 }

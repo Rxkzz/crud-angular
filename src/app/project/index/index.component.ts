@@ -1,32 +1,42 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../project.service';
 import { Project } from '../project';
-import Swal from 'sweetalert2'
- 
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-index',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.css']
 })
-
-
-export class IndexComponent implements OnInit{
- 
+export class IndexComponent implements OnInit {
   projects: Project[] = [];
- 
-  constructor(public projectService: ProjectService) { }
- 
+
+  constructor(private projectService: ProjectService) {}
+
   ngOnInit(): void {
-    this.fetchProjectList()
+    this.fetchProjectList();
   }
- 
-  fetchProjectList(){
-    this.projectService.getAll().then(({data}) => {
-      this.projects = data;
-    }).catch(error => {return error})
+
+  fetchProjectList(): void {
+    this.projectService.getAll()
+      .subscribe(
+        (data) => {
+          this.projects = data; // Update projects with entire response object
+        },
+        (error) => {
+          console.error('Error fetching projects:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'An Error Occurred!',
+            text: 'Failed to fetch projects.',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      );
   }
- 
-  handleDelete(id:number){
+
+  handleDelete(id: number): void {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -35,31 +45,31 @@ export class IndexComponent implements OnInit{
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!'
-    }).then(result =>{
+    }).then((result) => {
       if (result.isConfirmed) {
- 
         this.projectService.delete(id)
-        .then( response => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Project deleted successfully!',
-            showConfirmButton: false,
-            timer: 1500
-          })
-          this.fetchProjectList()
-          return response
-        }).catch(error => {
-          Swal.fire({
-            icon: 'error',
-           title: 'An Error Occured!',
-           showConfirmButton: false,
-           timer: 1500
-          })
-          return error
-        })
- 
+          .subscribe(
+            () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Project deleted successfully!',
+                showConfirmButton: false,
+                timer: 1500
+              });
+              this.fetchProjectList(); // Reload project list after deletion
+            },
+            (error) => {
+              console.error('Error deleting project:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'An Error Occurred!',
+                text: 'Failed to delete project.',
+                showConfirmButton: false,
+                timer: 1500
+              });
+            }
+          );
       }
-    })  
+    });
   }
- 
 }

@@ -1,6 +1,6 @@
 export interface Project {
     id: number;
-    name: string;
+    modelName: string;
     description: string;
     location: string;
 }

@@ -1,40 +1,97 @@
 import { Injectable } from '@angular/core';
-import axios from 'axios';
- 
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { tap } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 export class UserAuthService {
- 
-  constructor() { }
- 
-  login(data:any): Promise<any>{
-    let payload = {
-      email: data.email,
-      password: data.password
+
+  private baseUrl = 'http://192.168.5.200:84/api/';
+
+  constructor(private http: HttpClient, private router: Router) { }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      });
+    } else {
+      return new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
     }
+  }
+
+  register(user: any): Observable<any> {
+    const url = `${this.baseUrl}User`;
+    return this.http.post(url, user, { responseType: 'text' });
+  }
   
-    return axios.post('/api/login', payload)
+  updatePassword(oldPassword: string, newPassword: string): Observable<any> {
+    const url = `${this.baseUrl}User/ChangePassword`;
+    const body = { oldPassword, newPassword };
+    return this.http.post(url, body, { headers: this.getAuthHeaders() ,responseType: 'text' }).pipe(
+      catchError(error => {
+        console.error('Error Change Password', error);
+        throw error(() => new Error(error.message || 'Server Error' ));
+      })
+    );  
   }
- 
-  register(data:any): Promise<any>{
-    let payload = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      password_confirmation: data.confirmPassword
-    }
-     
-    return axios.post('/api/register', payload)
+
+  login(email: string, password: string): Observable<any> {
+    const url = `${this.baseUrl}General/Login`;
+    return this.http.post(url, { emailAddress: email, password: password }).pipe(
+      tap((response: any) => {
+        if (response && response.accessToken) {
+          localStorage.setItem('authToken', response.accessToken);
+          localStorage.setItem('userId', response.userId)
+          console.log(response.accessToken)
+        }
+      }));
   }
- 
-  getUser(): Promise<any>{
- 
-    return axios.get('/api/user', { headers:{Authorization: 'Bearer ' + localStorage.getItem('token')}})
+
+  getUser(id: number): Observable<any> {
+    const url = `${this.baseUrl}User/${id}`;
+    return this.http.get(url, { headers: this.getAuthHeaders() });
   }
- 
-  logout(): Promise<any>{
- 
-    return axios.post('/api/logout',{}, { headers:{Authorization: 'Bearer ' + localStorage.getItem('token')}})
+
+
+  getEquipment(): Observable<any> {
+    const url = `${this.baseUrl}Equipment`;
+    return this.http.get(url, { headers: this.getAuthHeaders() }).pipe(
+      catchError(error => {
+        console.error('Error fetching equipment data', error);
+        return throwError(() => new Error(error.message || 'Server Error'));
+      })
+    );
+  }
+
+  getEquipmentById(id: number): Observable<any> {
+    const url = `${this.baseUrl}Equipment/${id}`;
+    return this.http.get(url, { headers: this.getAuthHeaders() });
+  }
+
+  addEquipment(equipment: any): Observable<any> {
+    const url = `${this.baseUrl}Equipment`;
+    return this.http.post(url, equipment, { headers: this.getAuthHeaders() });
+  }
+
+  updateEquipment(equipment: any): Observable<any> {
+    const url = `${this.baseUrl}Equipment`;
+    return this.http.put(url, equipment, { headers: this.getAuthHeaders() });
+  }
+
+  deleteEquipment(id: number): Observable<any> {
+    const url = `${this.baseUrl}Equipment/${id}`;
+    return this.http.delete(url, { headers: this.getAuthHeaders() });
+  }
+  
+  logout() {
+    localStorage.removeItem('authToken');
+    this.router.navigate(['/login']);
   }
 }

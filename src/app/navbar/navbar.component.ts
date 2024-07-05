@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { User } from '../user/user';
-import { UserAuthService } from '../user-auth.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AxiosService } from '../axios.service';
 
 @Component({
   selector: 'app-navbar',
@@ -11,29 +12,40 @@ import { UserAuthService } from '../user-auth.service';
 })
 export class NavbarComponent {
 
-  user!:User
- 
-  constructor(public userAuthService: UserAuthService, private router: Router) {}
- 
+  isMenuOpen: boolean = false;
+  fullName: string | undefined;
+
+  constructor(private router: Router, private axiosService: AxiosService) {}
+
   ngOnInit(): void {
-   if(localStorage.getItem('token') == "" || localStorage.getItem('token') == null){
-      this.router.navigateByUrl('/')
-    }else {
-      this.userAuthService.getUser().then(({data})=>{
-        this.user = data;
-      })
+    this.fetchUserName();
+  }
+
+  fetchUserName(): void {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      this.axiosService.getUser(+userId).then(
+        user => {
+          this.fullName = user.fullName;
+        },
+        error => {
+          console.error('Error fetching user data', error);
+        }
+      );
     }
   }
- 
-  logoutAction () {
-    this.userAuthService.logout().then(()=>{
-      localStorage.setItem('token', "")
-      this.router.navigateByUrl('/')
-    }).catch(()=>{
-      localStorage.setItem('token', "")
-      this.router.navigateByUrl('/')
-    })
-   
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  logout() {
+    localStorage.removeItem('authToken');
+    this.router.navigate(['/login']);
+    console.log('Logout berhasil');
   }
 }
+ 
+ 
+
 

@@ -1,29 +1,54 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../project.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Project } from '../project';
- 
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-show',
   templateUrl: './show.component.html',
   styleUrls: ['./show.component.css']
 })
 export class ShowComponent implements OnInit {
-  project:Project
- 
-  constructor(@Inject(ProjectService) public projectService: ProjectService, private route: ActivatedRoute) {
+  project: Project;
+
+  constructor(
+    private projectService: ProjectService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
     this.project = {
-      id:this.route.snapshot.params['id'],
-      name: '',
+      id: this.route.snapshot.params['id'],
+      modelName: '',
       description: '',
-      location:'',
-    }
+      location: ''
+    };
   }
- 
+
   ngOnInit(): void {
-    this.projectService.show(this.route.snapshot.params['id']).then(({data}) => {
-      this.project = data
-    }).catch(error => {return error})
-     
+    this.loadProject();
+  }
+
+  loadProject(): void {
+    this.projectService.show(this.project.id)
+      .subscribe(
+        (data) => {
+          this.project = data; // Update project with entire response object
+        },
+        (error) => {
+          console.error('Error loading project:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load project details.',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      );
+  }
+
+  navigateToIndex(): void {
+    this.router.navigate(['/index']);
   }
 }

@@ -11,7 +11,7 @@
             <div class="form-group">
                 <label html="name">Name</label>
                 <input
-                    [(ngModel)]="project.name"
+                    [(ngModel)]="project.modelName"
                     type="text"
                     class="form-control"
                     id="name"
@@ -25,6 +25,15 @@
                     id="description"
                     rows="3"
                     name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label html="location">Location</label>
+                <input
+                    [(ngModel)]="project.location"
+                    type="text"
+                    class="form-control"
+                    id="location"
+                    name="location"/>
             </div>
             <button
                 [disabled]="isSaving"
