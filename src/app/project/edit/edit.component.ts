@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../project.service';
+import { AxiosService } from '../../axios.service';// Sesuaikan path sesuai struktur proyek Anda
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Project } from '../project';
@@ -14,7 +14,7 @@ export class EditComponent implements OnInit {
   isSaving: boolean = false;
 
   constructor(
-    private projectService: ProjectService,
+    private axiosService: AxiosService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -31,48 +31,45 @@ export class EditComponent implements OnInit {
   }
 
   loadProject(): void {
-    this.projectService.show(this.project.id)
-      .subscribe(
-        (data) => {
-          this.project = data; // Update project with entire response object
-        },
-        (error) => {
-          console.error('Error loading project:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load project details.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        }
-      );
+    this.axiosService.getEquipmentById(this.project.id)
+      .then(response => {
+        this.project = response;
+      })
+      .catch(error => {
+        console.error('Error loading project:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load project details.',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      });
   }
 
   handleSave(): void {
     this.isSaving = true;
-    this.projectService.update(this.project)
-      .subscribe(
-        () => {
-          this.isSaving = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Project saved successfully!',
-            showConfirmButton: false,
-            timer: 1500
-          });
-          this.router.navigate(['/show', this.project.id]);
-        },
-        (error) => {
-          this.isSaving = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'An Error Occurred!',
-            showConfirmButton: false,
-            timer: 1500
-          });
-          console.error('Error updating project:', error);
-        }
-      );
+    this.axiosService.updateEquipment(this.project)
+      .then(() => {
+        this.isSaving = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Project saved successfully!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        this.router.navigate(['/show', this.project.id]);
+      })
+      .catch(error => {
+        this.isSaving = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'An Error Occurred!',
+          text: 'Failed to save project. Please try again later.',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        console.error('Error updating project:', error);
+      });
   }
 }

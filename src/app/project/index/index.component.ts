@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../project.service';
-import { Project } from '../project';
+import { AxiosService } from '../project.service'; // Sesuaikan path sesuai struktur proyek Anda
 import Swal from 'sweetalert2';
+import { Project } from '../project';
 
 @Component({
   selector: 'app-index',
@@ -11,29 +11,27 @@ import Swal from 'sweetalert2';
 export class IndexComponent implements OnInit {
   projects: Project[] = [];
 
-  constructor(private projectService: ProjectService) {}
+  constructor(private axiosService: AxiosService) {}
 
   ngOnInit(): void {
     this.fetchProjectList();
   }
 
   fetchProjectList(): void {
-    this.projectService.getAll()
-      .subscribe(
-        (data) => {
-          this.projects = data; // Update projects with entire response object
-        },
-        (error) => {
-          console.error('Error fetching projects:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'An Error Occurred!',
-            text: 'Failed to fetch projects.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        }
-      );
+    this.axiosService.getEquipment()
+      .then(response => {
+        this.projects = response;
+      })
+      .catch(error => {
+        console.error('Error fetching projects:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'An Error Occurred!',
+          text: 'Failed to fetch projects.',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      });
   }
 
   handleDelete(id: number): void {
@@ -47,28 +45,28 @@ export class IndexComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.projectService.delete(id)
-          .subscribe(
-            () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Project deleted successfully!',
-                showConfirmButton: false,
-                timer: 1500
-              });
-              this.fetchProjectList(); // Reload project list after deletion
-            },
-            (error) => {
-              console.error('Error deleting project:', error);
-              Swal.fire({
-                icon: 'error',
-                title: 'An Error Occurred!',
-                text: 'Failed to delete project.',
-                showConfirmButton: false,
-                timer: 1500
-              });
-            }
-          );
+        console.log(`Attempting to delete project with ID: ${id}`); // Log ID
+        this.axiosService.deleteEquipment(id)
+          .then(() => {
+            console.log(`Project with ID: ${id} deleted successfully`); // Log success
+            Swal.fire({
+              icon: 'success',
+              title: 'Project deleted successfully!',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            this.fetchProjectList();
+          })
+          .catch(error => {
+            console.error('Error deleting project:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'An Error Occurred!',
+              text: 'Failed to delete project.',
+              showConfirmButton: false,
+              timer: 1500
+            });
+          });
       }
     });
   }

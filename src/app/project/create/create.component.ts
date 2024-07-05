@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ProjectService } from '../project.service';
+import { AxiosService } from '../../axios.service'; // Sesuaikan path sesuai struktur proyek Anda
 import Swal from 'sweetalert2';
 
 @Component({
@@ -13,36 +13,33 @@ export class CreateComponent {
   location: string = '';
   isSaving: boolean = false;
 
-  constructor(private projectService: ProjectService) {}
+  constructor(private axiosService: AxiosService) {}
 
   handleSave(): void {
     this.isSaving = true;
-    this.projectService.create({ modelName: this.modelName, description: this.description, location: this.location })
-      .subscribe({
-        next: (data) => {
-          this.isSaving = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Project saved successfully!',
-            showConfirmButton: false,
-            timer: 1500
-          });
-          this.modelName = '';
-          this.description = '';
-          this.location = '';
-          // Optionally, you can handle additional logic with 'data' returned from API
-        },
-        error: (error) => {
-          this.isSaving = false;
-          console.error('Error saving project:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Something bad happened; please try again later.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        }
+    this.axiosService.addEquipment({ modelName: this.modelName, description: this.description, location: this.location })
+      .then(response => {
+        this.isSaving = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Project saved successfully!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        this.modelName = '';
+        this.description = '';
+        this.location = '';
+      })
+      .catch(error => {
+        this.isSaving = false;
+        console.error('Error saving project:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to save project. Please check your input and try again.',
+          showConfirmButton: false,
+          timer: 1500
+        });
       });
   }
 }

@@ -1,91 +1,102 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Project } from './project';
-import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import axios from 'axios';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectService {
-  private apiUrl = 'http://192.168.5.200:84/api';
+export class AxiosService {
+  private baseUrl = 'http://192.168.5.200:84/api/';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private router: Router) {}
 
-  getAll(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/Equipment`)
-      .pipe(
-        catchError(this.handleError)
-      );
+  private getAuthHeaders() {
+    const token = localStorage.getItem('authToken');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
-  create(data: any): Observable<any> {
-    const authToken = 'Bearer ' + localStorage.getItem('authToken');
-    const headers = new HttpHeaders({
-      'Authorization': authToken
+  register(user: any){
+    return axios.post(`${this.baseUrl}User`, user, {
+      headers: this.getAuthHeaders(),
     });
-
-    return this.http.post<any>(`${this.apiUrl}/Equipment`, data, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
   }
 
-  update(data: Project): Observable<any> {
-    const authToken = 'Bearer ' + localStorage.getItem('authToken');
-    const headers = new HttpHeaders({
-      'Authorization': authToken
+  updatePassword(oldPassword: string, newPassword: string){
+    return axios.post(`${this.baseUrl}User/ChangePassword`, { oldPassword, newPassword}, { 
+      headers: this.getAuthHeaders(),
     });
-
-    return this.http.patch<any>(`${this.apiUrl}/Equipment/${data.id}`, data, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
   }
 
-  delete(id: number): Observable<any> {
-    const authToken = 'Bearer ' + localStorage.getItem('authToken');
-    const headers = new HttpHeaders({
-      'Authorization': authToken
-    });
-
-    return this.http.delete<any>(`${this.apiUrl}/Equipment/${id}`, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
-  }
-
-  show(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/Equipment/${id}`)
-      .pipe(
-        catchError(this.handleError)
-      );
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    if (error.status === 401) {
-      console.error('Backend returned code 401, body was:', error.error);
-      // Handle 401 errors, e.g., redirect to login page or prompt user to re-authenticate
-      Swal.fire({
-        icon: 'error',
-        title: 'Unauthorized',
-        text: 'Please login again.',
-        showConfirmButton: false,
-        timer: 1500
+  login(email: string, password: string): Promise<any> {
+    const url = `${this.baseUrl}General/Login`;
+    return axios.post(url, { emailAddress: email, password: password })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
       });
-      this.router.navigate(['/login']); // Example: Redirect to login page
-    } else {
-      console.error('Something bad happened; please try again later.');
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Something bad happened; please try again later.',
-        showConfirmButton: false,
-        timer: 1500
+  }
+
+  getUser(id: number): Promise<any> {
+    return axios.get(`${this.baseUrl}User/${id}`, {
+      headers: this.getAuthHeaders(),
+    })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
       });
-    }
-    return throwError('Something bad happened; please try again later.');
+  }
+
+  getEquipment(): Promise<any> {
+    const url = `${this.baseUrl}Equipment`;
+    return axios.get(url, { headers: this.getAuthHeaders() })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
+      });
+  }
+
+  getEquipmentById(id: number) {
+    return axios.get(`${this.baseUrl}Equipment/${id}`, {
+      headers: this.getAuthHeaders(),
+    })
+    .then(response => response.data)
+    .catch(error => {
+      throw error.response || error;
+    });
+  }
+  
+
+  addEquipment(equipment: any): Promise<any> {
+    const url = `${this.baseUrl}Equipment`;
+    return axios.post(url, equipment, { headers: this.getAuthHeaders() })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
+      });
+  }
+
+  updateEquipment(equipment: any): Promise<any> {
+    const url = `${this.baseUrl}Equipment/${equipment.id}`; // Pastikan menggunakan ID yang sesuai
+    return axios.put(url, equipment, { headers: this.getAuthHeaders() })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
+      });
+  }
+  
+
+  deleteEquipment(id: number): Promise<any> {
+    const url = `${this.baseUrl}Equipment/${id}`;
+    return axios.delete(url, { headers: this.getAuthHeaders() })
+      .then(response => response.data)
+      .catch(error => {
+        throw error.response || error;
+      });
+  }
+  
+
+  logout() {
+    localStorage.removeItem('authToken');
+    this.router.navigate(['/login']);
   }
 }

@@ -58,8 +58,13 @@ export class AxiosService {
   getEquipmentById(id: number) {
     return axios.get(`${this.baseUrl}Equipment/${id}`, {
       headers: this.getAuthHeaders(),
+    })
+    .then(response => response.data)
+    .catch(error => {
+      throw error.response || error;
     });
   }
+  
 
   addEquipment(equipment: any): Promise<any> {
     const url = `${this.baseUrl}Equipment`;
@@ -71,13 +76,14 @@ export class AxiosService {
   }
 
   updateEquipment(equipment: any): Promise<any> {
-    const url = `${this.baseUrl}Equipment`;
+    const url = `${this.baseUrl}Equipment/${equipment.id}`; // Pastikan menggunakan ID yang sesuai
     return axios.put(url, equipment, { headers: this.getAuthHeaders() })
       .then(response => response.data)
       .catch(error => {
         throw error.response || error;
       });
   }
+  
 
   deleteEquipment(id: number): Promise<any> {
     const url = `${this.baseUrl}Equipment/${id}`;
@@ -87,6 +93,7 @@ export class AxiosService {
         throw error.response || error;
       });
   }
+  
 
   logout() {
     localStorage.removeItem('authToken');

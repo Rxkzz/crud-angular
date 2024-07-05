@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../project.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { AxiosService } from '../../axios.service';
 import { Project } from '../project';
 import Swal from 'sweetalert2';
 
@@ -10,45 +10,28 @@ import Swal from 'sweetalert2';
   styleUrls: ['./show.component.css']
 })
 export class ShowComponent implements OnInit {
-  project: Project;
+  project: Project | undefined;
 
   constructor(
-    private projectService: ProjectService,
     private route: ActivatedRoute,
-    private router: Router
-  ) {
-    this.project = {
-      id: this.route.snapshot.params['id'],
-      modelName: '',
-      description: '',
-      location: ''
-    };
-  }
+    private axiosService: AxiosService
+  ) {}
 
   ngOnInit(): void {
-    this.loadProject();
-  }
-
-  loadProject(): void {
-    this.projectService.show(this.project.id)
-      .subscribe(
-        (data) => {
-          this.project = data; // Update project with entire response object
-        },
-        (error) => {
-          console.error('Error loading project:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load project details.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        }
-      );
-  }
-
-  navigateToIndex(): void {
-    this.router.navigate(['/index']);
+    const projectId = Number(this.route.snapshot.paramMap.get('id'));
+    this.axiosService.getEquipmentById(projectId)
+      .then((data: Project) => {
+        this.project = data;
+      })
+      .catch((error: any) => {
+        console.error('Error fetching project details:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'An Error Occurred!',
+          text: 'Failed to fetch project details.',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      });
   }
 }
