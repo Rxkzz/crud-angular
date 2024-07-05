@@ -26,6 +26,15 @@
                     rows="3"
                     name="description"></textarea>
             </div>
+            <div class="form-group">
+                <label html="location">Location</label>
+                <input
+                    [(ngModel)]="location"
+                    type="text"
+                    class="form-control"
+                    id="location"
+                    name="location"/>
+            </div>
             <button
                 [disabled]="isSaving"
                 (click)="handleSave()"

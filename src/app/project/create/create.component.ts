@@ -11,13 +11,14 @@ import { FormsModule } from '@angular/forms';
 export class CreateComponent { 
   name:string = ''
   description:string = ''
+  location:string = ''
   isSaving:boolean = false
  
   constructor(@Inject(ProjectService) public projectService: ProjectService) {}
  
   handleSave(){
     this.isSaving = true
-    this.projectService.create({name:this.name, description:this.description})
+    this.projectService.create({name:this.name, description:this.description, location:this.location})
     .then(({data}) => {
       this.isSaving = false
       Swal.fire({
@@ -28,6 +29,7 @@ export class CreateComponent {
       })
       this.name = ""
       this.description = ""
+      this.location = ""
       return data
  
     }).catch(error => {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ProjectService } from '../project.service';
 import { Project } from '../project';
 import Swal from 'sweetalert2'
@@ -8,6 +8,8 @@ import Swal from 'sweetalert2'
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.css']
 })
+
+
 export class IndexComponent implements OnInit{
  
   projects: Project[] = [];

@@ -17,7 +17,8 @@ export class EditComponent implements OnInit {
     this.project = {
       id: this.route.snapshot.params['id'],
       name: '',
-      description: ''
+      description: '',
+      location: ''
     };
   }
  

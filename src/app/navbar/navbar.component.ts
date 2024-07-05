@@ -4,12 +4,12 @@ import { User } from '../user/user';
 import { UserAuthService } from '../user-auth.service';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-navbar',
   standalone: false,
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  templateUrl: './navbar.component.html',
+  styleUrl: './navbar.component.css'
 })
-export class DashboardComponent {
+export class NavbarComponent {
 
   user!:User
  

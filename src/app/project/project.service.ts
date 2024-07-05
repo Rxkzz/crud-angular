@@ -19,7 +19,8 @@ export class ProjectService {
   create(data:any): Promise<any>{
     let payload = {
       name: data.name,
-      description: data.description
+      description: data.description,
+      location: data.location
     }
  
     return axios.post('/api/projects', payload)
@@ -32,7 +33,8 @@ export class ProjectService {
   update(data:Project): Promise<any>{
     let payload = {
       name: data.name,
-      description: data.description
+      description: data.description,
+      location: data.location
     }
  
     return axios.patch('/api/projects/' + data.id, payload)
